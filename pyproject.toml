@@ -1,0 +1,18 @@
+[project]
+name = "bpmn-architect"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "aofitasotr", email = "mcherepnov@gmail.com"}
+]
+requires-python = ">=3.12,<3.14"
+dependencies = ["fastapi (>=0.142.2,<0.143.0)", "uvicorn (>=0.54.0,<0.55.0)", "langgraph (>=1.2.12,<2.0.0)", "ollama (>=0.6.3,<0.7.0)"]
+
+
+[tool.poetry]
+package-mode = false
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
