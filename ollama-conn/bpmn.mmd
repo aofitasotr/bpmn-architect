@@ -1,0 +1,30 @@
+graph TD
+    A[Start Event] --> B{Decision Point}
+    B --> |Condition 1| C[Task 1]
+    B --> |Condition 2| D[Task 2]
+    B --> |Condition 3| E[Sub-Process]
+    
+    C --> F[Sub-Task 1]
+    C --> G[Sub-Task 2]
+    
+    E --> H(Complex Task)
+    E --> I[Task 3]
+    
+    F --> J[End Event]
+    G --> K[End Event]
+    I --> L{Sub-Decision}
+    L --> |Condition 4| M[Task 4]
+    L --> |Condition 5| N[Task 5]
+    M --> O[End Event]
+    N --> P[End Event]
+    
+    H --> Q[Parallel Task 1]
+    H --> R[Parallel Task 2]
+    H --> S[Parallel Task 3]
+    H --> T[Parallel Task 4]
+    
+    H --> U[Event-Based Gateway]
+    U --> V{Event Condition}
+    V --> |Event Condition| W[Task 6]
+    
+    W --> X[End Event]
