@@ -1,6 +1,6 @@
 # BPMN Architect AI
 
-Агент строит BPMN 2.0 диаграмму по текстовому описанию. Модель генерирует MMD (Mermaid swimlane-beta), результат проверяется валидатором, при ошибках отправляется на доработку (LangGraph), в браузере рисуется через `app/web/index.html`, где пулы считаются по границам дорожек.
+Агент строит BPMN 2.0 диаграмму по текстовому описанию. Модель генерирует MMD (Mermaid), результат проверяется валидатором, при ошибках отправляется на доработку (LangGraph), в браузере рисуется через `app/web/index.html`, где пулы считаются по границам дорожек.
 
 ## Запуск в Docker
 
@@ -19,8 +19,6 @@ pip install -r requirements.txt
 python -m app.core.health
 streamlit run app/ui/main.py
 ```
-
-API (опционально): `uvicorn app.main:app`, `POST /diagram`.
 
 ## Структура
 
