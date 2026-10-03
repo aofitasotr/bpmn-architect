@@ -1,0 +1,1 @@
+An online shop receives an order from a customer. A manager checks the order and item availability. If the item is out of stock, the manager notifies the customer about the refusal and the process ends. If the item is in stock, the manager issues an invoice, the customer pays it, and the warehouse collects the order using a waybill, checking the warehouse database, and ships it.

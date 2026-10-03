@@ -1,0 +1,5 @@
+langgraph>=1.2.12,<2.0.0
+ollama>=0.6.3,<0.7.0
+fastapi>=0.142.2,<0.143.0
+uvicorn>=0.54.0,<0.55.0
+streamlit>=1.65

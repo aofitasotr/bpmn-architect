@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BPMN</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<style>
+html, body { margin: 0; background: #fff; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+#stage { padding: 16px; overflow: auto; box-sizing: border-box; }
+#stage svg { display: block; margin: 0 auto; max-width: none !important; }
+#error { display: none; margin: 16px; padding: 12px 14px; color: #b3261e; background: #fdecea; border-radius: 8px; font-size: 14px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="error"></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+const MMD = __MMD__;
+const ICONS = __ICONS__;
+const POOL_W = 34;
+const POOL_STROKE = "#1f2937";
+const parsePools = text => text.split("\n")
+  .map(l => l.trim().match(/^%%\s*pool\s*:\s*(.+?)\s*\|\s*(.+)$/i))
+  .filter(Boolean)
+  .map(m => ({ name: m[1], lanes: m[2].split(",").map(s => s.trim()).filter(Boolean) }));
+const laneBox = id => {
+  const g = document.querySelector(`#stage svg g.cluster[id="${CSS.escape(id)}"]`);
+  if (!g) return null;
+  const title = g.querySelector("rect.swimlane-title");
+  const body = g.querySelector("rect.swimlane-body");
+  if (!title || !body) return null;
+  const x0 = +title.getAttribute("x");
+  const y0 = +body.getAttribute("y");
+  return { x0, y0, x1: +body.getAttribute("x") + +body.getAttribute("width"), y1: y0 + +body.getAttribute("height") };
+};
+const svgEl = (name, attrs) => {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+};
+const drawPools = (svg, pools) => {
+  const layer = svgEl("g", { "pointer-events": "none" });
+  let minX = Infinity;
+  const frames = pools.map(p => {
+    const boxes = p.lanes.map(laneBox).filter(Boolean);
+    if (!boxes.length) return null;
+    return {
+      name: p.name,
+      x0: Math.min(...boxes.map(b => b.x0)) - POOL_W,
+      y0: Math.min(...boxes.map(b => b.y0)),
+      x1: Math.max(...boxes.map(b => b.x1)),
+      y1: Math.max(...boxes.map(b => b.y1)),
+    };
+  }).filter(Boolean);
+  if (!frames.length) return;
+  frames.forEach(f => {
+    minX = Math.min(minX, f.x0);
+    const h = f.y1 - f.y0;
+    layer.appendChild(svgEl("rect", { x: f.x0, y: f.y0, width: f.x1 - f.x0, height: h, fill: "none", stroke: POOL_STROKE, "stroke-width": 2 }));
+    layer.appendChild(svgEl("rect", { x: f.x0, y: f.y0, width: POOL_W, height: h, fill: "#f3f4f6", stroke: POOL_STROKE, "stroke-width": 2 }));
+    const t = svgEl("text", {
+      x: 0, y: 0, transform: `translate(${f.x0 + POOL_W / 2}, ${f.y0 + h / 2}) rotate(-90)`,
+      "text-anchor": "middle", "dominant-baseline": "central", "font-size": 15, "font-weight": 600, fill: POOL_STROKE,
+      "font-family": "Arial, Helvetica, sans-serif",
+    });
+    t.textContent = f.name;
+    layer.appendChild(t);
+  });
+  svg.appendChild(layer);
+  const vb = svg.getAttribute("viewBox").split(/\s+/).map(Number);
+  const pad = 4;
+  const left = Math.min(vb[0], minX - pad);
+  const top = Math.min(vb[1], Math.min(...frames.map(f => f.y0)) - pad);
+  const right = Math.max(vb[0] + vb[2], Math.max(...frames.map(f => f.x1)) + pad);
+  const bottom = Math.max(vb[1] + vb[3], Math.max(...frames.map(f => f.y1)) + pad);
+  svg.setAttribute("viewBox", `${left} ${top} ${right - left} ${bottom - top}`);
+  svg.setAttribute("width", right - left);
+  svg.setAttribute("height", bottom - top);
+  svg.style.maxWidth = "none";
+};
+const show = async () => {
+  const stage = document.getElementById("stage");
+  const err = document.getElementById("error");
+  try {
+    mermaid.registerIconPacks([{ name: "bpmn", icons: { prefix: "bpmn", width: 48, height: 48, icons: Object.fromEntries(Object.entries(ICONS).map(([k, v]) => [k, { body: v }])) } }]);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral", fontFamily: "Arial, Helvetica, sans-serif", themeVariables: { fontFamily: "Arial, Helvetica, sans-serif" } });
+    await document.fonts.load('900 1em "Font Awesome 6 Free"');
+    await document.fonts.ready;
+    const { svg } = await mermaid.render("bpmn-diagram", MMD);
+    stage.innerHTML = svg;
+    const el = stage.querySelector("svg");
+    el.removeAttribute("style");
+    drawPools(el, parsePools(MMD));
+    const h = Math.ceil(el.getBoundingClientRect().height) + 34;
+    window.parent.postMessage({ type: "bpmn-height", height: h }, "*");
+  } catch (e) {
+    err.style.display = "block";
+    err.textContent = String(e.message || e);
+  }
+};
+show();
+</script>
+</body>
+</html>

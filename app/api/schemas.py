@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 
-
 class BPMNRequest(BaseModel):
     text: str
-
+    previous: str = ""
+    instruction: str = ""
 
 class BPMNResponse(BaseModel):
-    valid: bool
-    reason: str
-    mermaid: str | None
+    ok: bool
+    mmd: str
+    errors: list[str]
+    attempts: int
