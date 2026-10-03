@@ -5,10 +5,12 @@
 ## Запуск в Docker
 
 ```bash
-docker compose up --build
+./docker/up.sh
 ```
 
-Что происходит: `ollama` стартует, `model-pull` скачивает `qwen3.5:7b` (если такой модели нет — `qwen3.5:9b`), `app` ждёт модель, проверяет что Ollama отвечает, и запускает UI.
+Скрипт при необходимости перезапускает Colima с 10 ГБ памяти (`COLIMA_MEMORY`, `COLIMA_CPU`), затем делает `docker compose up --build`.
+
+Что происходит: `ollama` стартует, `model-pull` скачивает `qwen3.5:9b` (если не получилось — `qwen3.5:7b`), `app` ждёт модель, проверяет что Ollama отвечает, и запускает UI.
 
 UI: http://localhost:8501
 
