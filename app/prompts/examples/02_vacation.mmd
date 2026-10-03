@@ -1,0 +1,36 @@
+swimlane-beta LR
+%% pool: Company | L1, L2, L3, L4
+subgraph L1["Employee"]
+  s1@{ shape: icon, icon: "bpmn:start", label: "Vacation needed", pos: "b", h: 40 }
+  t1("fa:fa-user Submit request")
+  t6("fa:fa-envelope-open Receive rejection notice")
+  e1@{ shape: icon, icon: "bpmn:end", label: "Rejection received", pos: "b", h: 40 }
+  t7("fa:fa-envelope-open Receive confirmation")
+  e2@{ shape: icon, icon: "bpmn:end", label: "Vacation approved", pos: "b", h: 40 }
+end
+subgraph L2["Manager"]
+  eb1@{ shape: icon, icon: "bpmn:event-based", label: "Wait for decision", pos: "t", h: 44 }
+  t2("fa:fa-user Review request")
+  c1@{ shape: icon, icon: "bpmn:catch-timer", label: "3 days", pos: "b", h: 40 }
+  t3("fa:fa-envelope Send reminder")
+  g1@{ shape: icon, icon: "bpmn:xor", label: "Approved?", pos: "t", h: 44 }
+end
+subgraph L3["HR"]
+  g2@{ shape: icon, icon: "bpmn:and", label: "In parallel", pos: "t", h: 44 }
+  t4("fa:fa-user Prepare order")
+  g3@{ shape: icon, icon: "bpmn:and", label: "Both done", pos: "t", h: 44 }
+  t8("fa:fa-envelope Notify employee about rejection")
+end
+subgraph L4["Accounting"]
+  t5("fa:fa-gear Calculate vacation pay")
+end
+s1 --> t1 --> eb1
+eb1 --> t2
+eb1 --> c1 --> t3 --> eb1
+t2 --> g1
+g1 -->|No| t8
+g1 -->|Yes| g2
+g2 --> t4 --> g3
+g2 --> t5 --> g3
+g3 --> t7 --> e2
+t8 --> t6 --> e1

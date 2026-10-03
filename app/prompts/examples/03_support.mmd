@@ -1,0 +1,31 @@
+swimlane-beta LR
+%% pool: Customer | L1
+%% pool: Support service | L2, L3
+subgraph L1["Customer"]
+  s1@{ shape: icon, icon: "bpmn:start", label: "Problem occurred", pos: "b", h: 40 }
+  t1("fa:fa-user Send request")
+  eb1@{ shape: icon, icon: "bpmn:event-based", label: "Wait for reply", pos: "t", h: 44 }
+  c2@{ shape: icon, icon: "bpmn:catch-message", label: "Solution received", pos: "b", h: 40 }
+  t6("fa:fa-user Confirm solution")
+  c1@{ shape: icon, icon: "bpmn:catch-timer", label: "2 days", pos: "b", h: 40 }
+  e1@{ shape: icon, icon: "bpmn:end", label: "Case closed", pos: "b", h: 40 }
+end
+subgraph L2["First-line operator"]
+  t2("fa:fa-user Register in CRM")
+  crm[("CRM")]
+  t3("fa:fa-user Try to resolve")
+  g1@{ shape: icon, icon: "bpmn:xor", label: "Resolved?", pos: "t", h: 44 }
+  t5("fa:fa-envelope Send solution to customer")
+end
+subgraph L3["Second-line engineer"]
+  sp1[["Diagnostics and repair"]]
+end
+s1 --> t1 --> eb1
+eb1 --> c2 --> t6 --> e1
+eb1 --> c1 --> e1
+t1 -.->|Request| t2
+t2 --> t3 --> g1
+t2 -.- crm
+g1 -->|Yes| t5
+g1 -->|No| sp1 --> t5
+t5 -.->|Solution| c2

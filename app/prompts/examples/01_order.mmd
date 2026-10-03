@@ -1,0 +1,27 @@
+swimlane-beta LR
+%% pool: Online shop | L1, L2
+%% pool: Customer | L3
+subgraph L1["Manager"]
+  s1@{ shape: icon, icon: "bpmn:start-message", label: "Order received", pos: "b", h: 40 }
+  t1("fa:fa-user Check order")
+  g1@{ shape: icon, icon: "bpmn:xor", label: "Item in stock?", pos: "t", h: 44 }
+  t2("fa:fa-envelope Notify about refusal")
+  e1@{ shape: icon, icon: "bpmn:end", label: "Refused", pos: "b", h: 40 }
+  t3("fa:fa-user Issue invoice")
+end
+subgraph L2["Warehouse"]
+  t4("fa:fa-gear Collect order")
+  db1[("Warehouse DB")]
+  d1@{ shape: doc, label: "Waybill" }
+  e2@{ shape: icon, icon: "bpmn:end", label: "Order shipped", pos: "b", h: 40 }
+end
+subgraph L3["Customer"]
+  t5("fa:fa-user Pay invoice")
+end
+s1 --> t1 --> g1
+g1 -->|No| t2 --> e1
+g1 -->|Yes| t3 --> t4 --> e2
+t4 -.- db1
+t4 -.- d1
+t3 -.->|Invoice| t5
+t5 -.->|Payment| t4

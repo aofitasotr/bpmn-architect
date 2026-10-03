@@ -1,9 +1,10 @@
 from typing import TypedDict
 
-
 class BPMNState(TypedDict):
-    user_input: str
-    is_valid: bool
-    validation_reason: str
-    process_model: dict
-    mermaid: str
+    request: str
+    previous: str
+    instruction: str
+    raw: str
+    mmd: str
+    errors: list[str]
+    attempts: int
