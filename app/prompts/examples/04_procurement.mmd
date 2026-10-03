@@ -1,0 +1,36 @@
+swimlane-beta LR
+%% pool: Company | L1, L2, L3, L4
+%% pool: Supplier | L5
+subgraph L1["Buyer"]
+  s1@{ shape: icon, icon: "bpmn:start-message", label: "Purchase request", pos: "b", h: 40 }
+  t1("fa:fa-envelope Request offers")
+  g1@{ shape: icon, icon: "bpmn:and", label: "In parallel", pos: "t", h: 44 }
+  t2("fa:fa-table-list Compare prices")
+  g2@{ shape: icon, icon: "bpmn:and", label: "Merge", pos: "t", h: 44 }
+  t4("fa:fa-envelope Place order")
+end
+subgraph L2["Lawyer"]
+  t3("fa:fa-user Check contract")
+end
+subgraph L3["Finance director"]
+  t5("fa:fa-user Decide on budget")
+  g3@{ shape: icon, icon: "bpmn:xor", label: "Budget exceeded?", pos: "t", h: 44 }
+  e1@{ shape: icon, icon: "bpmn:end-terminate", label: "Purchase cancelled", pos: "b", h: 40 }
+end
+subgraph L4["Warehouse"]
+  c1@{ shape: icon, icon: "bpmn:catch-message", label: "Goods arrived", pos: "b", h: 40 }
+  t6("fa:fa-hand Receive goods")
+  e2@{ shape: icon, icon: "bpmn:end", label: "Goods received", pos: "b", h: 40 }
+end
+subgraph L5["Supplier"]
+  t7("fa:fa-user Confirm order and ship")
+end
+s1 --> t1 --> g1
+g1 --> t2 --> g2
+g1 --> t3 --> g2
+g2 --> t5 --> g3
+g3 -->|Yes| e1
+g3 -->|No| t4
+t4 -.->|Order| t7
+t7 -.->|Goods| c1
+c1 --> t6 --> e2
