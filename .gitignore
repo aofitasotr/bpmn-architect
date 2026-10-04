@@ -227,3 +227,5 @@ __marimo__/
 *.tex
 *.nav
 *.snm
+
+schemas/
