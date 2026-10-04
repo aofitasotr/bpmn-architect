@@ -1,16 +1,24 @@
 # BPMN Architect AI
 
-Агент строит BPMN 2.0 диаграмму по текстовому описанию. Модель генерирует MMD (Mermaid), результат проверяется валидатором, при ошибках отправляется на доработку (LangGraph), в браузере рисуется через `app/web/index.html`, где пулы считаются по границам дорожек.
+Агент строит диаграмму в нотации BPMN 2.0, по текстовому описанию. Модель генерирует MMD (далее можно скачать XML), результат проверяется валидатором, при ошибках отправляется на доработку (LangGraph), в браузере рисуется через `app/web/index.html`, где пулы считаются по границам дорожек.
 
 ## Запуск в Docker
+
+Linux, macOS, WSL, Git Bash:
 
 ```bash
 ./docker/up.sh
 ```
 
-Скрипт при необходимости перезапускает Colima с 10 ГБ памяти (`COLIMA_MEMORY`, `COLIMA_CPU`), затем делает `docker compose up --build`.
+Windows (PowerShell):
 
-Что происходит: `ollama` стартует, `model-pull` скачивает `qwen3.5:9b` (если не получилось — `qwen3.5:7b`), `app` ждёт модель, проверяет что Ollama отвечает, и запускает UI.
+```powershell
+.\docker\up.ps1
+```
+
+Скрипт запускает Docker, если он выключен (Colima, Docker Desktop или systemd), проверяет что ему доступно не меньше 10 ГБ памяти (`DOCKER_MEMORY_GB`, для Colima также `COLIMA_CPU`) и делает `docker compose up --build`. Для Docker Desktop и WSL2 память задаётся в настройках, скрипт подскажет где. Без скриптов достаточно `docker compose up --build`.
+
+`ollama` стартует, `model-pull` скачивает `qwen3.5:9b` (если не получилось - `qwen3.5:7b` если нет, другую), `app` ждёт модель, проверяет что Ollama отвечает, и запускает UI.
 
 UI: http://localhost:8501
 
@@ -24,9 +32,9 @@ streamlit run app/ui/main.py
 
 ## Структура
 
-- `app/prompts/system.md` — шаблонный запрос: справочник элементов и правила
-- `app/prompts/examples/` — рабочие примеры (описание + MMD)
-- `app/bpmn/validator.py` — проверка MMD
-- `app/agents/` — граф generate → check → retry
-- `app/web/index.html`, `icons.json` — рендер и расчёт пулов
-- `app/ui/main.py` — Streamlit
+- `app/prompts/system.md` - шаблонный запрос: справочник элементов и правила
+- `app/prompts/examples/` - рабочие примеры (описание + MMD)
+- `app/bpmn/validator.py` - проверка MMD
+- `app/agents/` - граф generate -> check -> retry
+- `app/web/index.html`, `icons.json` - рендер и расчёт пулов
+- `app/ui/main.py` - Streamlit

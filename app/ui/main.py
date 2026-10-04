@@ -7,6 +7,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from app.agents.graph import run
+from app.bpmn.export import mmd_to_bpmn_xml
 from app.bpmn.render import build_html
 
 CSS = """
@@ -67,7 +68,7 @@ def result_view() -> None:
     mmd = st.session_state.mmd
     st.caption(st.session_state.request)
     st.iframe(build_html(mmd), height=frame_height(mmd))
-    redo, again, download, new = st.columns(4)
+    redo, again, download, download_xml, new = st.columns(5)
     if redo.button("Переделать", use_container_width=True):
         st.session_state.redo_open = not st.session_state.redo_open
     if again.button("Пересоздать", use_container_width=True):
@@ -78,6 +79,13 @@ def result_view() -> None:
         data=build_html(mmd),
         file_name="bpmn.html",
         mime="text/html",
+        use_container_width=True,
+    )
+    download_xml.download_button(
+        "Скачать XML",
+        data=mmd_to_bpmn_xml(mmd),
+        file_name="bpmn.xml",
+        mime="application/xml",
         use_container_width=True,
     )
     if new.button("Новая диаграмма", use_container_width=True):
