@@ -1,6 +1,10 @@
 services:
   ollama:
     image: ollama/ollama:latest
+    environment:
+      OLLAMA_NUM_PARALLEL: 1
+      OLLAMA_MAX_LOADED_MODELS: 1
+      OLLAMA_KEEP_ALIVE: 30m
     volumes:
       - ollama:/root/.ollama
     ports:
@@ -18,7 +22,7 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_HOST: http://ollama:11434
-      OLLAMA_MODELS: qwen3.5:7b,qwen3.5:9b
+      OLLAMA_MODELS: qwen3.5:9b,qwen3.5:7b
     volumes:
       - ./docker/pull_model.sh:/pull_model.sh:ro
     entrypoint: ["/bin/sh", "/pull_model.sh"]
@@ -31,7 +35,7 @@ services:
         condition: service_completed_successfully
     environment:
       OLLAMA_HOST: http://ollama:11434
-      OLLAMA_MODELS: qwen3.5:7b,qwen3.5:9b
+      OLLAMA_MODELS: qwen3.5:9b,qwen3.5:7b
     ports:
       - "8501:8501"
     healthcheck:
