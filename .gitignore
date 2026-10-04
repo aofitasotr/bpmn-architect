@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# LaTex
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out
+*.toc
+*.tex
+*.nav
+*.snm
