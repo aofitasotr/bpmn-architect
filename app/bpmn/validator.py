@@ -27,10 +27,12 @@ class Node:
     kind: str
     lane: str
     icon: str = ""
+    name: str = ""
 
 @dataclass
 class Model:
     lanes: list[str] = field(default_factory=list)
+    lane_names: dict[str, str] = field(default_factory=dict)
     pools: list[tuple[str, list[str]]] = field(default_factory=list)
     nodes: dict[str, Node] = field(default_factory=dict)
     edges: list[tuple[str, str, str, str]] = field(default_factory=list)
@@ -42,7 +44,7 @@ def _parse_at(nid: str, body: str, lane: str, n: int, errors: list[str]) -> Node
         errors.append(f"line {n}: {nid} must have shape and label in double quotes")
         return None
     if shape.group(1) == "doc":
-        return Node(nid, "data", lane)
+        return Node(nid, "data", lane, "doc", label.group(1))
     if shape.group(1) != "icon":
         errors.append(f"line {n}: shape '{shape.group(1)}' is not supported, allowed: icon and doc")
         return None
@@ -53,7 +55,7 @@ def _parse_at(nid: str, body: str, lane: str, n: int, errors: list[str]) -> Node
     name = icon.group(1)
     head = name.split("-")[0]
     kind = {"start": "start", "end": "end"}.get(head, "gateway" if name in GATEWAYS else "event")
-    return Node(nid, kind, lane, name)
+    return Node(nid, kind, lane, name, label.group(1))
 
 def parse(mmd: str) -> tuple[Model, list[str]]:
     model = Model()
@@ -93,6 +95,7 @@ def parse(mmd: str) -> tuple[Model, list[str]]:
             if lane in model.lanes:
                 errors.append(f"line {n}: lane {lane} is declared twice")
             model.lanes.append(lane)
+            model.lane_names[lane] = m.group(2)
             continue
         if lane:
             node = None
@@ -103,11 +106,12 @@ def parse(mmd: str) -> tuple[Model, list[str]]:
                 icon = re.match(r"fa:fa-([\w-]+)\s+\S", task.group(2))
                 if icon and icon.group(1) not in TASK_ICONS:
                     errors.append(f"line {n}: icon fa:fa-{icon.group(1)} is not supported")
-                node = Node(task.group(1), "task", lane)
+                text = task.group(2)
+                node = Node(task.group(1), "task", lane, icon.group(1) if icon else "", text[icon.end() - 1:].strip() if icon else text.strip())
             elif sub:
-                node = Node(sub.group(1), "subprocess", lane)
+                node = Node(sub.group(1), "subprocess", lane, "", sub.group(2))
             elif store:
-                node = Node(store.group(1), "data", lane)
+                node = Node(store.group(1), "data", lane, "store", store.group(2))
             else:
                 errors.append(f"line {n}: unrecognized element inside a lane: {line}")
                 continue
