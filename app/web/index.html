@@ -9,13 +9,18 @@
 html, body { margin: 0; background: #fff; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
 #stage { padding: 16px; overflow: auto; box-sizing: border-box; }
 #stage svg { display: block; margin: 0 auto; max-width: none !important; }
+#png { display: none; position: absolute; top: 10px; right: 14px; z-index: 5; padding: 6px 12px; font: 500 13px/1 -apple-system, "Segoe UI", Roboto, sans-serif; color: #1f2937; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; }
+#png:hover { background: #f3f4f6; }
+#png:disabled { opacity: .6; cursor: progress; }
 #error { display: none; margin: 16px; padding: 12px 14px; color: #b3261e; background: #fdecea; border-radius: 8px; font-size: 14px; white-space: pre-wrap; }
 </style>
 </head>
 <body>
+<button id="png" type="button">Скачать PNG</button>
 <div id="stage"></div>
 <div id="error"></div>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <script>
 const MMD = __MMD__;
 const ICONS = __ICONS__;
@@ -80,6 +85,58 @@ const drawPools = (svg, pools) => {
   svg.setAttribute("height", bottom - top);
   svg.style.maxWidth = "none";
 };
+const MAX_PIXELS = 16e6;
+const FA_CSS = "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css";
+let faFontCss = null;
+const blobToDataUrl = blob => new Promise(resolve => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.readAsDataURL(blob);
+});
+// The library cannot read the cross-origin Font Awesome sheet, so the solid font
+// (used by the fa:fa-* icons) is embedded by hand; without it icons export as empty boxes.
+const loadFaFont = async () => {
+  if (faFontCss !== null) return faFontCss;
+  faFontCss = "";
+  try {
+    const css = await (await fetch(FA_CSS)).text();
+    const face = css.match(/@font-face\{[^}]*font-weight:900[^}]*\}/)[0];
+    const file = face.match(/url\(["']?([^)"']+\.woff2)["']?\)/)[1];
+    const data = await blobToDataUrl(await (await fetch(new URL(file, FA_CSS))).blob());
+    faFontCss = `@font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;src:url(${data}) format("woff2")}`;
+  } catch (e) {
+    console.warn("Font Awesome could not be embedded", e);
+  }
+  return faFontCss;
+};
+const pngDataUrl = async () => {
+  const el = document.querySelector("#stage svg");
+  const { width, height } = el.getBoundingClientRect();
+  const w = Math.ceil(width), h = Math.ceil(height);
+  // Sharp on screens, but keep the canvas within browser limits for big diagrams.
+  const pixelRatio = Math.max(1, Math.min(2, Math.sqrt(MAX_PIXELS / (w * h))));
+  return htmlToImage.toPng(el, {
+    pixelRatio, backgroundColor: "#fff", width: w, height: h,
+    fontEmbedCSS: await loadFaFont(),
+  });
+};
+const downloadPng = async () => {
+  const btn = document.getElementById("png");
+  const err = document.getElementById("error");
+  btn.disabled = true;
+  try {
+    const a = document.createElement("a");
+    a.href = await pngDataUrl();
+    a.download = "bpmn.png";
+    a.click();
+  } catch (e) {
+    err.style.display = "block";
+    err.textContent = "PNG: " + String(e.message || e);
+  } finally {
+    btn.disabled = false;
+  }
+};
+document.getElementById("png").addEventListener("click", downloadPng);
 const show = async () => {
   const stage = document.getElementById("stage");
   const err = document.getElementById("error");
@@ -94,6 +151,7 @@ const show = async () => {
     el.removeAttribute("style");
     drawPools(el, parsePools(MMD));
     const h = Math.ceil(el.getBoundingClientRect().height) + 34;
+    document.getElementById("png").style.display = "block";
     window.parent.postMessage({ type: "bpmn-height", height: h }, "*");
   } catch (e) {
     err.style.display = "block";
