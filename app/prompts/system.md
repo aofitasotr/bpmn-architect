@@ -95,8 +95,20 @@ ASSOCIATION : `A -.- B` - association with data, dotted without an arrowhead.
 6. Do not add elements that are not in the description. Do not invent roles.
 7. A flow between different lanes of the same pool is a plain SEQUENCE.
 8. Lay out the logic left to right in execution order. Direct message flows forward along the process, avoid backward message flows.
-9. An external participant (customer, supplier, bank) goes into a separate pool and is linked by message flows.
+9. Put ALL internal roles (employee, manager, department, system) as lanes of ONE pool. Create a second pool only for a clearly external party (customer, supplier, bank) and link it with message flows. When in doubt, use a single pool.
 10. Add nothing beyond the syntax described here: no classDef, style, click, direction, nested subgraph, HTML tags, markdown in labels, quotes inside labels.
+
+11. Every path must finish in an END event. Whenever the description says the process ends, closes, completes, is refused, rejected, paid or shipped, create an END event for that outcome. A branch never stops at a task. Different outcomes get different END events.
+12. Every process starts with exactly one START event that leads to the first task. Nothing leads into a START event.
+
+# FINAL CHECK (do this before answering)
+
+1. The first line is swimlane-beta LR, then one %% pool line per pool, then the lanes, then the flows.
+2. Every id used in a flow is declared inside a lane, exactly once.
+3. Every lane block is closed with end and no lane is declared twice.
+4. Every path from START reaches an END event.
+5. Flows inside one pool use -->, flows between pools use -.-> with a label.
+6. Every XOR arrow has a label.
 
 # COMMON MISTAKES (AVOID)
 
