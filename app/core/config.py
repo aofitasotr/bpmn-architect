@@ -6,3 +6,5 @@ MAX_ATTEMPTS = int(os.getenv("MAX_ATTEMPTS", "5"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.2"))
 NUM_CTX = int(os.getenv("NUM_CTX", "16384"))
 NUM_PREDICT = int(os.getenv("NUM_PREDICT", "4096"))
+
+THINK = os.getenv("THINK", "0") == "1"

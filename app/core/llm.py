@@ -24,7 +24,7 @@ def chat(messages: list[dict], num_predict: int | None = None, temperature: floa
     response = client().chat(
         model=resolve_model(),
         messages=messages,
-        think=False,
+        think=config.THINK,
         options={
             "temperature": config.TEMPERATURE if temperature is None else temperature,
             "num_ctx": config.NUM_CTX,

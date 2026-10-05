@@ -18,6 +18,11 @@ def extract_mmd(text: str) -> str:
     code = blocks[0] if blocks else text
     return code.strip()
 
+def language_rule(request: str) -> str:
+    if re.search("[\u0400-\u04FF]", request):
+        return "Write ALL labels (events, tasks, gateways, lanes, pools, flows) in Russian."
+    return "Write all labels in the language of the process description."
+
 def build_messages(request: str, previous: str, instruction: str, raw: str, errors: list[str]) -> list[dict]:
     if previous and instruction:
         user = (
@@ -28,7 +33,7 @@ def build_messages(request: str, previous: str, instruction: str, raw: str, erro
             "Return the full code of the updated diagram and keep everything else unchanged."
         )
     else:
-        user = f"Process description:\n{request}\n\nBuild the diagram. Write all labels in the language of the process description above."
+        user = f"Process description:\n{request}\n\nBuild the diagram. {language_rule(request)}"
     messages = [
         {"role": "system", "content": system_prompt()},
         {"role": "user", "content": user},

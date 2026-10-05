@@ -17,8 +17,33 @@ CSS = """
 h1 { font-weight: 600; letter-spacing: -0.02em; font-size: 1.6rem !important; }
 .stButton > button, .stDownloadButton > button { border-radius: 10px; height: 2.6rem; }
 textarea { border-radius: 10px !important; }
-iframe { border: 1px solid #e5e7eb; border-radius: 12px; }
+iframe { border: 0; }
 </style>
+"""
+
+PNG_BUTTON = """
+<style>
+html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+button { width: 100%; height: 100%; box-sizing: border-box; cursor: pointer; font: 400 16px sans-serif; color: #111827; background: #fff; border: 1px solid rgba(17, 24, 39, 0.2); border-radius: 10px; }
+button:hover { border-color: #111827; }
+</style>
+<button id="b" type="button">Скачать PNG</button>
+<script>
+const b = document.getElementById("b");
+try {
+  const ref = window.parent.document.querySelector(".stButton button, .stDownloadButton button");
+  window.parent.document.querySelectorAll('link[rel="stylesheet"]').forEach(l => document.head.appendChild(l.cloneNode()));
+  const cs = window.parent.getComputedStyle(ref);
+  const text = window.parent.getComputedStyle(ref.querySelector("p") || ref);
+  ["fontFamily", "fontSize", "fontWeight", "color"].forEach(k => { b.style[k] = text[k]; });
+  ["backgroundColor", "borderRadius", "border"].forEach(k => { b.style[k] = cs[k]; });
+} catch (e) {}
+b.onclick = () => {
+  for (let i = 0; i < window.parent.frames.length; i++) {
+    try { window.parent.frames[i].postMessage({ type: "bpmn-download-png" }, "*"); } catch (e) {}
+  }
+};
+</script>
 """
 
 def init() -> None:
@@ -67,13 +92,16 @@ def input_view() -> None:
 def result_view() -> None:
     mmd = st.session_state.mmd
     st.caption(st.session_state.request)
-    st.iframe(build_html(mmd), height=frame_height(mmd))
-    redo, again, download_xml, new = st.columns(4)
+    with st.container(border=True):
+        st.iframe(build_html(mmd), height=frame_height(mmd))
+    redo, again, download_png, download_xml, new = st.columns(5)
     if redo.button("Переделать", use_container_width=True):
         st.session_state.redo_open = not st.session_state.redo_open
     if again.button("Пересоздать", use_container_width=True):
         generate(st.session_state.request)
         st.rerun()
+    with download_png:
+        st.iframe(PNG_BUTTON, height=42)
     download_xml.download_button(
         "Скачать XML",
         data=mmd_to_bpmn_xml(mmd),
